@@ -43,6 +43,10 @@ button {
     cursor: pointer;
 }
 
+button > * {
+    pointer-events: none;
+}
+
 button:hover {
     color: var(--color-neutral);
     background-color: var(--color-accent);
@@ -420,6 +424,20 @@ main {
     backdrop-filter: blur(2px) brightness(50%);
 }
 
+.modal__close {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    padding: 0;
+    font-size: 3rem;
+    background-color: var(--color-additional);
+}
+
+.modal__close:hover {
+    color: var(--color-red);
+    background-color: var(--color-additional);
+}
+
 .new-task-form {
     display: grid;
     gap: 0.25rem;
@@ -433,19 +451,8 @@ main {
     margin: 1rem 0;
 }
 
-.new-task-form__error {
-    display: none;
-    margin: 1rem 0;
-    padding: 1rem 0;
-    border-radius: 0.5rem;
-    color: var(--color-red);
-}
-
-.new-task-form.error .new-task-form__error {
-    display: block;
-}
-
 .new-task-form__item {
+    position: relative;
     font-weight: 600;
     color: var(--color-secondary);
 }
