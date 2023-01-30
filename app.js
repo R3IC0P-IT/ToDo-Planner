@@ -1,53 +1,48 @@
-const currentDate = new Date();
-const [DAY, MONTH, YEAR] = [
-    currentDate.getDate(),
-    currentDate.getMonth() + 1,
-    currentDate.getFullYear(),
-];
+const CURRENT_DATE = new Date();
+const [CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY] = CURRENT_DATE.toISOString()
+    .split("T")[0]
+    .split("-");
 const TASK_LIST = JSON.parse(localStorage.getItem("TASK_LIST")) || [];
-
+const header = document.querySelector(".js-header");
+const modal = document.querySelector(".js-new-task-modal");
 const newTaskBtn = document.querySelector(".js-new-task-btn");
+
+modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.classList.contains("js-modal-close")) {
+        modal.classList.remove("active");
+    }
+});
+
 newTaskBtn.addEventListener("click", () => {
-    document.querySelector(".js-new-task-modal").classList.add("active");
     const form = document.querySelector(".js-new-task-form");
-    document.querySelector("#new-task-date").valueAsDate = currentDate;
+    const taskDate = document.querySelector(".js-new-task-date");
 
-    form.addEventListener(
-        "submit",
-        (e) => {
-            e.preventDefault();
-            let color = "";
-            let error = "";
-            const taskDate = e.target[2].value.split("-");
+    modal.classList.add("active");
+    taskDate.valueAsDate = CURRENT_DATE;
+    taskDate.min = `${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DAY}`;
 
-            if (new Date(taskDate[0], taskDate[1], taskDate[2]) < new Date(YEAR, MONTH, DAY)) {
-                error += "Nie można dodać zdarzenia starszych niz dzień dzisiejszy";
-                form.classList.add("error");
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        let color = "";
+
+        for (const el of form) {
+            if (el.name === "new-task-color" && el.checked) {
+                color = el.classList[1].split("--")[1];
             }
+        }
 
-            document.querySelector(".js-new-task-error").textContent = error;
-            if (error) return;
+        TASK_LIST.push({
+            title: e.target[0].value,
+            content: e.target[1].value,
+            date: e.target[2].value,
+            color,
+        });
+        localStorage.setItem("TASK_LIST", JSON.stringify(TASK_LIST));
 
-            for (const el of form) {
-                if (el.name === "new-task-color" && el.checked) {
-                    color = el.classList[1].split("--")[1];
-                }
-            }
-
-            TASK_LIST.push({
-                title: e.target[0].value,
-                content: e.target[1].value,
-                date: e.target[2].value,
-                color,
-            });
-            localStorage.setItem("TASK_LIST", JSON.stringify(TASK_LIST));
-
-            renderCalendar();
-            form.reset();
-            document.querySelector(".js-new-task-modal").classList.remove("active");
-        },
-        { once: true }
-    );
+        renderCalendar();
+        form.reset();
+        document.querySelector(".js-new-task-modal").classList.remove("active");
+    });
 });
 
 const calendarGrid = document.querySelector(".calendar__grid");
@@ -69,8 +64,8 @@ function generateDay(dayNumber, tasks = []) {
     return `
         <div class="
             calendar__day 
-            ${dayNumber === DAY ? "today" : ""}
-            ${dayNumber < DAY ? "past" : ""}
+            ${dayNumber === CURRENT_DAY ? "today" : ""}
+            ${dayNumber < CURRENT_DAY ? "past" : ""}
         ">
             <span class="calendar__number">${dayNumber}</span>
             <div class="calendar__list">
@@ -81,7 +76,7 @@ function generateDay(dayNumber, tasks = []) {
 }
 
 function renderCalendar() {
-    const daysInMonth = new Date(YEAR, MONTH, 0).getDate();
+    const daysInMonth = new Date(CURRENT_YEAR, CURRENT_MONTH, 0).getDate();
     calendarGrid.innerHTML = "";
     let days = "";
 
